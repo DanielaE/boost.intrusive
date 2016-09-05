@@ -11,7 +11,8 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 #include <boost/container/vector.hpp> //vector
-#include <algorithm> //sort, random_shuffle
+#include <algorithm> //sort
+#include <random>
 #include <boost/intrusive/detail/config_begin.hpp>
 #include "common_functors.hpp"
 #include <boost/intrusive/options.hpp>
@@ -20,7 +21,16 @@
 #include "test_macros.hpp"
 #include "test_container.hpp"
 
-namespace boost{
+namespace boost {
+namespace detail {
+
+inline std::random_device & get_common_random_device() {
+	static std::random_device generator;
+	return generator;
+}
+
+}
+
 namespace intrusive{
 namespace test{
 
@@ -122,7 +132,7 @@ void test_generic_assoc<ContainerDefiner>::test_insert_erase_burst()
       }
       TEST_INTRUSIVE_SEQUENCE_EXPECTED(testset, testset.begin());
       //Random erasure
-      std::random_shuffle(it_vector.begin(), it_vector.end());
+      std::shuffle(it_vector.begin(), it_vector.end(), std::default_random_engine(boost::detail::get_common_random_device()()));
       for(std::size_t i = 0; i != MaxValues; ++i){
          testset.erase(testset.iterator_to(*it_vector[i]));
          testset.check();
